@@ -92,7 +92,7 @@ const EMOTION_HINT = {
     'Passive-Aggressive': 'sweet on the surface but pointed underneath',
 };
 
-function buildSystemPrompt(assistant) {
+export function buildSystemPrompt(assistant) {
     const roleHint    = ROLE_HINT[assistant.role]       || 'stay fully in character for this role';
     const emotionHint = EMOTION_HINT[assistant.emotion] || 'match this tone throughout';
 
@@ -106,7 +106,7 @@ function buildSystemPrompt(assistant) {
     ].join(' ');
 }
 
-function buildUserPrompt(event, reminder) {
+export function buildUserPrompt(event, reminder) {
     const lines = [
         `Event: ${event.title}`,
         `When: ${format(event.start, "EEEE, MMMM d, yyyy 'at' h:mm a")}`,

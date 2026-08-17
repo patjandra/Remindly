@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     format, startOfMonth, startOfWeek, addDays,
     eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths,
@@ -9,9 +9,14 @@ const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 export default function MiniCalendar({ selectedDate, onDateSelect }) {
     const [viewMonth, setViewMonth] = useState(selectedDate || new Date());
 
-    useEffect(() => {
+    // Track selectedDate and adjust viewMonth to follow it — done during render
+    // (React's recommended "adjusting state" pattern) rather than in a useEffect,
+    // which would cause an extra, avoidable re-render on every selectedDate change.
+    const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
+    if (selectedDate !== prevSelectedDate) {
+        setPrevSelectedDate(selectedDate);
         if (selectedDate) setViewMonth(selectedDate);
-    }, [selectedDate]);
+    }
 
     // Always render exactly 6 weeks (42 cells), even though a month only needs 4-6 —
     // otherwise the grid's own height changes month to month and pushes "Create

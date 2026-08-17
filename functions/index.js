@@ -78,6 +78,17 @@ const MAX_VOICE_LEN  = 50;   // tts: voiceName
 const MAX_PROMPT_LEN = 2000; // generateScript: event-details prompt
 const MAX_SYSTEM_LEN = 1000; // generateScript: persona/system instruction
 
+// Pure fixed-window decision, factored out of checkRateLimit so it's unit-testable
+// without the Admin SDK / a live Firestore transaction. `data` is the previous
+// window doc (or null if this uid has never been rate-limited before); `now` is
+// Date.now(). Returns whether to allow the request and what the doc should become.
+function rateLimitDecision(data, now) {
+    const windowStart   = data?.windowStart?.toMillis ? data.windowStart.toMillis() : 0;
+    const windowExpired = now - windowStart > RATE_LIMIT_WINDOW_MS;
+    const count          = windowExpired ? 1 : (data?.count || 0) + 1;
+    return { allow: windowExpired || count <= RATE_LIMIT_MAX, windowExpired, count };
+}
+
 // Returns true if the request should proceed, false if the caller is over budget.
 async function checkRateLimit(uid) {
     const ref = admin.firestore().collection("rateLimits").doc(uid);
@@ -87,13 +98,8 @@ async function checkRateLimit(uid) {
         const snap = await tx.get(ref);
         const data = snap.exists ? snap.data() : null;
 
-        const windowStart   = data?.windowStart?.toMillis ? data.windowStart.toMillis() : 0;
-        const windowExpired = now - windowStart > RATE_LIMIT_WINDOW_MS;
-        const count          = windowExpired ? 1 : (data?.count || 0) + 1;
-
-        if (!windowExpired && count > RATE_LIMIT_MAX) {
-            return false;
-        }
+        const { allow, windowExpired, count } = rateLimitDecision(data, now);
+        if (!allow) return false;
 
         tx.set(ref, {
             windowStart: windowExpired ? admin.firestore.Timestamp.fromMillis(now) : data.windowStart,
@@ -407,3 +413,7 @@ exports.cleanupAssistantPhoto = onDocumentDeleted(
         }
     },
 );
+
+// Exported for unit tests only (see test/rateLimitDecision.test.js) — not part of
+// the deployed functions surface.
+exports._rateLimitDecision = rateLimitDecision;
