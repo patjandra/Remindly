@@ -10,17 +10,25 @@ generates a persona-driven spoken script for each reminder and voices it, via
 Cloud Functions in `functions/index.js` (see `../TTS_BACKEND.md` for that backend's
 contract).
 
-The app currently uses simple state-based page switching, not React Router.
+The app has three top-level screens with real URLs, routed by a small hand-rolled
+History API wrapper (src/hooks/useRoute.js) rather than React Router — the app has
+no nested routes or route params, so a dependency isn't warranted. App.jsx keeps
+the URL in sync with auth state:
 
-user === null      → <LoginPage />
-user !== null      → <CalendarPage user={user} />
+"/"       (signed out)  → <LandingPage />  — public marketing homepage
+"/login"  (signed out)  → <LoginPage />
+"/app"    (signed in)   → <CalendarPage user={user} />
+
+Visiting any other path, or /app while signed out, redirects to "/" (replace, not
+push). Visiting "/" or "/login" while signed in redirects to "/app". Firebase
+Hosting's rewrite ("**" -> /index.html in firebase.json) means a hard refresh or a
+shared link on /app or /login still loads the SPA correctly.
 Commands
 npm run dev       # Start Vite dev server at localhost:5173
 npm run build     # Production build
 npm run lint      # ESLint check
 npm run preview   # Preview production build
-
-No automated test suite is currently configured.
+npm test          # Run the Vitest unit test suite
 
 Tech Stack
 React
