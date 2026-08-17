@@ -202,8 +202,10 @@ Create Assistant button
 Create example event button (opens EventModal pre-filled, doesn't write directly)
 Assistant list
 
-MainCalendar.jsx wraps react-big-calendar. It uses a ResizeObserver so the calendar
-resizes correctly when the sidebar opens or closes.
+MainCalendar.jsx wraps react-big-calendar with style={{ height: '100%' }} inside a
+flex layout — it resizes correctly when the sidebar opens or closes because it
+fills whatever space the flex parent gives it, not via a ResizeObserver (there
+isn't one in this codebase).
 
 Styling Guidelines
 
