@@ -154,9 +154,16 @@ export default function EventModal({ user, assistants, event: existingEvent = nu
         }
     }
 
+    // overflow-y-auto lives on the backdrop, not the card — so on a short viewport
+    // the whole card scrolls into view instead of the card clipping its own
+    // overflow, which would cut off the TimePicker/LocationInput/assistant
+    // dropdowns whenever they need to overlay past the card's edge. items-center
+    // is intentionally dropped in favor of the card's own my-auto: with
+    // items-center, a flex container that overflows clips the top of a centered
+    // child instead of letting it scroll.
     return (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[480px] p-5 relative" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/30 flex justify-center z-[9999] overflow-y-auto py-8" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[92vw] max-w-[480px] p-5 my-auto relative" onClick={(e) => e.stopPropagation()}>
 
                 {/* Close */}
                 <button onClick={onClose} className="absolute top-4 right-4 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors">
@@ -170,7 +177,7 @@ export default function EventModal({ user, assistants, event: existingEvent = nu
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Add title"
                     autoFocus={!isEdit}
-                    className="w-full pr-8 text-[22px] font-semibold text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600 outline-none border-b-2 border-gray-100 dark:border-gray-700 focus:border-blue-400 pb-3 mb-2 transition-colors bg-transparent"
+                    className="w-full pr-8 text-[22px] font-semibold tracking-tight text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600 outline-none border-b-2 border-gray-100 dark:border-gray-700 focus:border-blue-400 pb-3 mb-2 transition-colors bg-transparent"
                 />
 
                 {/* Date / time */}

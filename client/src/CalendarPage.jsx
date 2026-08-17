@@ -25,6 +25,15 @@ const AVATAR_COLORS = [
     'bg-teal-500',   'bg-pink-500',
 ];
 
+// Shows the assistant's uploaded photo when there is one, falling back to the
+// colored-initial circle otherwise. The color still renders behind a photo as a
+// placeholder while the image loads.
+function AvatarContent({ assistant }) {
+    return assistant.photoUrl
+        ? <img src={assistant.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
+        : assistant.name.charAt(0).toUpperCase();
+}
+
 /* ── Icons ── */
 const I = (d) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
 
@@ -36,9 +45,18 @@ function IconTrash()        { return <svg xmlns="http://www.w3.org/2000/svg" cla
 function IconSun()          { return <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>; }
 function IconMoon()         { return <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>; }
 function IconGoogle()       { return <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 4.75c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.46 14.97.5 12 .5A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 4.75 12 4.75z"/></svg>; }
+function IconSearch()       { return <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>; }
+function IconX()            { return <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>; }
+
+const isMobileViewport = () => typeof window !== 'undefined' && window.innerWidth < 768;
 
 export default function CalendarPage({ user, onLogout }) {
-    const [sideBarOpen,     setSideBarOpen]     = useState(true);
+    // Below md, the sidebar starts collapsed (mini strip) instead of eating the
+    // whole viewport — a 288px sidebar on a ~390px phone leaves no room for the
+    // calendar at all. See the `isMobile` render branch below for how "open"
+    // means something different on mobile (an overlay) vs desktop (docked).
+    const [isMobile,        setIsMobile]        = useState(isMobileViewport);
+    const [sideBarOpen,     setSideBarOpen]     = useState(() => !isMobileViewport());
     const [modalOpen,       setModalOpen]       = useState(false);
     const [editAssistant,   setEditAssistant]   = useState(null);
     const [confirmLogout,   setConfirmLogout]   = useState(false);
@@ -50,6 +68,7 @@ export default function CalendarPage({ user, onLogout }) {
         return VIEW_KEYS.includes(saved) ? saved : 'month';
     });
     const [assistants,      setAssistants]      = useState([]);
+    const [assistantSearch, setAssistantSearch] = useState('');
     const [events,          setEvents]          = useState([]);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const [eventSlot,       setEventSlot]       = useState(null);
@@ -63,6 +82,20 @@ export default function CalendarPage({ user, onLogout }) {
 
     useEffect(() => { localStorage.setItem('remindly-dark', darkMode); }, [darkMode]);
     useEffect(() => { localStorage.setItem('remindly-cal-view', calView); }, [calView]);
+
+    // Re-derive mobile/desktop on resize or orientation change (e.g. rotating a
+    // phone, or a desktop window being narrowed past the breakpoint) and reset the
+    // sidebar to that layout's natural default rather than leaving it stuck in
+    // whatever state it was in on the other side of the breakpoint.
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        function onChange(e) {
+            setIsMobile(e.matches);
+            setSideBarOpen(!e.matches);
+        }
+        mq.addEventListener('change', onChange);
+        return () => mq.removeEventListener('change', onChange);
+    }, []);
 
     // On first login, ask whether to import their Google Calendar (only once per user).
     useEffect(() => {
@@ -235,7 +268,15 @@ export default function CalendarPage({ user, onLogout }) {
     const iconBtn = 'p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer transition-colors';
 
     /* ── Sidebar content (shared between full and mini) ── */
-    const assistantList = assistants.map((a, i) => (
+    const filteredAssistants = assistantSearch.trim()
+        ? assistants.filter((a) => a.name.toLowerCase().includes(assistantSearch.trim().toLowerCase()))
+        : assistants;
+
+    const assistantList = filteredAssistants.map((a) => {
+        // Index into the full (unfiltered) list so an assistant's avatar color
+        // stays stable while searching instead of shifting as matches change.
+        const colorIdx = assistants.findIndex((x) => x.id === a.id);
+        return (
         <li key={a.id} className="rounded-xl overflow-hidden">
             {confirmDeleteId === a.id ? (
                 <div className="flex items-center justify-between bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
@@ -247,8 +288,8 @@ export default function CalendarPage({ user, onLogout }) {
                 </div>
             ) : (
                 <div className="group flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setEditAssistant(a)}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
-                        {a.name.charAt(0).toUpperCase()}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden ${AVATAR_COLORS[colorIdx % AVATAR_COLORS.length]}`}>
+                        <AvatarContent assistant={a} />
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{a.name}</p>
@@ -261,7 +302,8 @@ export default function CalendarPage({ user, onLogout }) {
                 </div>
             )}
         </li>
-    ));
+        );
+    });
 
     /* ── Full sidebar ── */
     const FullSidebar = (
@@ -270,7 +312,7 @@ export default function CalendarPage({ user, onLogout }) {
             <div className="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
                 <div className="flex items-center gap-2.5">
                     <img src={darkMode ? '/remindly-icon-dark.png' : '/remindly-icon.png'} alt="" className="w-9 h-9 rounded-xl object-contain pointer-events-none shrink-0" />
-                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Remindly</span>
+                    <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Remindly</span>
                 </div>
                 <button onClick={() => setSideBarOpen(false)} className={`${iconBtn} shrink-0`} title="Collapse sidebar">
                     <IconMenu />
@@ -294,14 +336,45 @@ export default function CalendarPage({ user, onLogout }) {
                 </button>
             </div>
 
-            {/* Assistant list */}
-            <div className="flex-1 overflow-y-auto px-3 pb-4">
+            {/* Assistant list — label + search stay put; only the list itself scrolls */}
+            <div className="flex-1 flex flex-col min-h-0 px-3 pb-4">
                 {assistants.length > 0 && (
-                    <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase mb-2 px-2">
-                        My Assistants
-                    </p>
+                    <div className="shrink-0">
+                        <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase mb-2 px-2">
+                            My Assistants
+                        </p>
+                        <div className="relative mb-2">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+                                <IconSearch />
+                            </span>
+                            <input
+                                type="text"
+                                value={assistantSearch}
+                                onChange={(e) => setAssistantSearch(e.target.value)}
+                                placeholder="Search assistants…"
+                                className="w-full border border-gray-200 dark:border-gray-700 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-blue-400 focus:bg-white dark:focus:bg-gray-900 transition-colors"
+                            />
+                            {assistantSearch && (
+                                <button
+                                    onClick={() => setAssistantSearch('')}
+                                    title="Clear search"
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer transition-colors"
+                                >
+                                    <IconX />
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 )}
-                <ul className="space-y-0.5">{assistantList}</ul>
+                <div className="flex-1 overflow-y-auto">
+                    {assistants.length > 0 && filteredAssistants.length === 0 ? (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
+                            No assistants match "{assistantSearch.trim()}".
+                        </p>
+                    ) : (
+                        <ul className="space-y-0.5">{assistantList}</ul>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -320,8 +393,8 @@ export default function CalendarPage({ user, onLogout }) {
             </button>
             {assistants.map((a, i) => (
                 <button key={a.id} onClick={() => setEditAssistant(a)} title={a.name}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 cursor-pointer hover:opacity-80 transition-opacity ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
-                    {a.name.charAt(0).toUpperCase()}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
+                    <AvatarContent assistant={a} />
                 </button>
             ))}
         </div>
@@ -331,30 +404,54 @@ export default function CalendarPage({ user, onLogout }) {
         /* Outer: horizontal — sidebar left, right column fills the rest */
         <div className={`flex w-screen h-screen ${darkMode ? 'dark' : ''}`}>
 
-            {sideBarOpen ? FullSidebar : MiniStrip}
+            {isMobile ? (
+                <>
+                    {/* Mini strip stays docked so there's always a way to reopen the
+                        sidebar — its own hamburger button toggles sideBarOpen. */}
+                    {MiniStrip}
+                    {sideBarOpen && (
+                        <div className="fixed inset-0 z-40 flex md:hidden">
+                            <div className="absolute inset-0 bg-black/40" onClick={() => setSideBarOpen(false)} />
+                            <div className="relative z-10 h-full shadow-2xl">{FullSidebar}</div>
+                        </div>
+                    )}
+                </>
+            ) : (
+                sideBarOpen ? FullSidebar : MiniStrip
+            )}
 
             {/* ── Right column: top nav + calendar ── */}
             <div className="flex flex-col flex-1 overflow-hidden bg-white dark:bg-gray-900">
 
-                {/* Top nav (sits only above the calendar) */}
-                <div className="flex items-center h-14 px-5 border-b border-gray-200 dark:border-gray-700 gap-2 shrink-0">
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100 mr-1">
+                {/* Top nav (sits only above the calendar). Below md there isn't enough
+                    room for every control at full size — rather than clip or squash
+                    anything unreadable, the row scrolls horizontally and each group
+                    holds its size (shrink-0) so it stays legible and reachable by swipe. */}
+                <div className="flex items-center h-14 px-5 border-b border-gray-200 dark:border-gray-700 gap-2 shrink-0 overflow-x-auto">
+                    {/* Fixed width (long enough for "September 2026", the widest month name)
+                        so the pill/switcher/buttons after it never shift as the label's
+                        own width changes month to month. */}
+                    <span className="w-[168px] shrink-0 text-lg font-semibold tracking-tight tabular-nums text-gray-800 dark:text-gray-200">
                         {format(calDate, 'MMMM yyyy')}
                     </span>
 
-                    <button onClick={() => navigate('prev')} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer transition-colors">
-                        <IconChevronLeft />
-                    </button>
-                    <button onClick={goToday} className="px-3.5 py-1 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
-                        Today
-                    </button>
-                    <button onClick={() => navigate('next')} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer transition-colors">
-                        <IconChevronRight />
-                    </button>
+                    {/* Prev/Today/Next — one grouped pill, matching the view switcher's
+                        bordered-segment treatment instead of three loose elements. */}
+                    <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-full overflow-hidden text-sm ml-4 shrink-0">
+                        <button onClick={() => navigate('prev')} className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-pointer transition-colors">
+                            <IconChevronLeft />
+                        </button>
+                        <button onClick={goToday} className="px-3.5 h-8 flex items-center border-x border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
+                            Today
+                        </button>
+                        <button onClick={() => navigate('next')} className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-pointer transition-colors">
+                            <IconChevronRight />
+                        </button>
+                    </div>
 
-                    <div className="flex-1" />
+                    <div className="flex-1 min-w-4" />
 
-                    <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden text-sm">
+                    <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden text-sm shrink-0">
                         {VIEWS.map(({ key, label }, i) => (
                             <button key={key} onClick={() => changeView(key)}
                                 className={`px-4 py-1.5 font-medium transition-colors cursor-pointer ${i > 0 ? 'border-l border-gray-300 dark:border-gray-600' : ''} ${calView === key ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200'}`}>
@@ -363,21 +460,28 @@ export default function CalendarPage({ user, onLogout }) {
                         ))}
                     </div>
 
-                    <button onClick={openNewEvent} className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 shadow-sm hover:shadow-md text-white font-semibold text-sm px-4 py-2 rounded-xl cursor-pointer transition-all">
-                        <span className="text-base leading-none">+</span> New event
+                    {/* Icon-only on narrow screens ("+" alone still reads clearly);
+                        the label returns once there's room to spare. */}
+                    <button onClick={openNewEvent} className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 shadow-sm hover:shadow-md text-white font-semibold text-sm px-4 py-2 rounded-xl cursor-pointer transition-all shrink-0">
+                        <span className="text-base leading-none">+</span> <span className="hidden sm:inline">New event</span>
                     </button>
 
-                    <button onClick={() => setDarkMode(d => !d)} className={iconBtn} title={darkMode ? 'Light mode' : 'Dark mode'}>
+                    <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1 shrink-0" />
+
+                    <button onClick={() => setDarkMode(d => !d)} className={`${iconBtn} shrink-0`} title={darkMode ? 'Light mode' : 'Dark mode'}>
                         {darkMode ? <IconSun /> : <IconMoon />}
                     </button>
 
-                    <button onClick={() => setConfirmLogout(true)} className={`${iconBtn} ml-3`} title="Log out">
+                    <button onClick={() => setConfirmLogout(true)} className={`${iconBtn} shrink-0`} title="Log out">
                         <IconLogout />
                     </button>
                 </div>
 
-                {/* Calendar */}
-                <div ref={calWrapperRef} className="flex-1 overflow-hidden p-4">
+                {/* Calendar — overflow-auto rather than overflow-hidden so that if the
+                    grid ever needs more room than a narrow screen has (e.g. dense
+                    overlapping events forcing a min-width on event pills), it scrolls
+                    instead of silently clipping content off the edge. */}
+                <div ref={calWrapperRef} className="flex-1 overflow-auto p-4">
                     {calView === 'agenda' ? (
                         <AgendaView events={events} date={calDate} onEventClick={setEditEvent} />
                     ) : (
@@ -403,7 +507,7 @@ export default function CalendarPage({ user, onLogout }) {
             {/* ── First-login Google Calendar import prompt ── */}
             {showImportPrompt && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-96">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-[92vw] max-w-96">
                         <div className="flex items-center gap-2.5 mb-2">
                             <IconGoogle />
                             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Import your Google Calendar?</h3>
@@ -442,7 +546,7 @@ export default function CalendarPage({ user, onLogout }) {
             {/* ── Logout confirmation ── */}
             {confirmLogout && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[9999]" onClick={() => setConfirmLogout(false)}>
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-80" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-[92vw] max-w-80" onClick={e => e.stopPropagation()}>
                         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-1">Log out of Remindly?</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">You'll be signed out of your account.</p>
                         <div className="flex gap-2 justify-end">

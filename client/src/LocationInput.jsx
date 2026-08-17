@@ -108,7 +108,7 @@ export default function LocationInput({ value, onChange, placeholder = 'Add loca
             {open && (loading || suggestions.length > 0) && (
                 <div
                     onMouseDown={(e) => e.preventDefault()}
-                    className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg z-50 w-[420px] max-h-64 overflow-y-auto"
+                    className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg z-50 w-[min(420px,85vw)] max-h-64 overflow-y-auto"
                 >
                     {loading && <p className="px-3 py-2 text-xs text-gray-400">Searching…</p>}
                     {!loading && suggestions.map((s, i) => (
