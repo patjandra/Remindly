@@ -391,3 +391,19 @@ exports.cleanupEventAudio = onDocumentDeleted(
         }
     },
 );
+
+// Fires on any deletion of users/{userId}/assistants/{assistantId} and clears
+// that assistant's uploaded profile photo (client/src/AssistantModal.jsx uploads
+// to this exact single-object path — see storage.rules) so deleting an assistant
+// doesn't leave its photo behind forever.
+exports.cleanupAssistantPhoto = onDocumentDeleted(
+    "users/{userId}/assistants/{assistantId}",
+    async (event) => {
+        const { userId, assistantId } = event.params;
+        try {
+            await admin.storage().bucket().file(`assistantPhotos/${userId}/${assistantId}`).delete({ ignoreNotFound: true });
+        } catch (err) {
+            logger.warn("Could not clean up photo for deleted assistant", assistantId, err);
+        }
+    },
+);

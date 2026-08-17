@@ -34,6 +34,20 @@ const EMOTION_STYLE = {
     Confident:   { tone: 'a bold, self-assured',    tag: ''            },
     Deadpan:     { tone: 'a flat, deadpan',         tag: ''            },
     Whimsical:   { tone: 'a whimsical, quirky',     tag: ''            },
+    Neutral:            { tone: 'a neutral, matter-of-fact',   tag: ''            },
+    Motivational:       { tone: 'a motivational, rousing',     tag: '[excited] '  },
+    Epic:               { tone: 'a grand, epic',                tag: '[dramatic] ' },
+    Sassy:              { tone: 'a sassy, cheeky',              tag: ''            },
+    Chaotic:            { tone: 'a chaotic, frenetic',          tag: ''            },
+    Unhinged:           { tone: 'a wild, unhinged',             tag: ''            },
+    Panicked:           { tone: 'a frantic, panicked',          tag: '[urgent] '   },
+    Smug:                { tone: 'a smug, self-satisfied',      tag: ''            },
+    Grumpy:              { tone: 'a grumpy, irritable',         tag: ''            },
+    Sleepy:              { tone: 'a drowsy, sleepy',            tag: ''            },
+    Mysterious:          { tone: 'a low, mysterious',           tag: ''            },
+    Villainous:          { tone: 'a sinister, villainous',      tag: '[dramatic] ' },
+    Judgmental:          { tone: 'a judgmental, side-eyeing',   tag: ''            },
+    'Passive-Aggressive': { tone: 'a sweetly passive-aggressive', tag: ''          },
 };
 
 // Sensible default voice per emotion when the assistant has no valid voiceId.
@@ -52,6 +66,20 @@ const EMOTION_VOICE = {
     Whimsical:   'Aoede',
     Cheerful:    'Zephyr',
     Gentle:      'Vindemiatrix',
+    Neutral:             'Schedar',
+    Motivational:        'Puck',
+    Epic:                'Kore',
+    Sassy:               'Zubenelgenubi',
+    Chaotic:             'Sadachbia',
+    Unhinged:            'Erinome',
+    Panicked:            'Leda',
+    Smug:                'Algieba',
+    Grumpy:              'Charon',
+    Sleepy:              'Callirrhoe',
+    Mysterious:          'Despina',
+    Villainous:          'Umbriel',
+    Judgmental:          'Achird',
+    'Passive-Aggressive': 'Sadaltager',
 };
 
 // Resolves the Gemini voice name for an assistant. assistant.voiceId now stores a

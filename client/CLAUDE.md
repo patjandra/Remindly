@@ -85,6 +85,7 @@ users
     │       ├── role
     │       ├── emotion
     │       ├── voiceId
+    │       ├── photoUrl (nullable — Storage download URL, see below)
     │       └── createdAt
     └── events
         └── {eventId}
@@ -106,8 +107,18 @@ Assistant object shape:
   role: string,
   emotion: string,
   voiceId: string,
+  photoUrl: string | null,
   createdAt: serverTimestamp()
 }
+
+Photo upload: AssistantModal.jsx uploads directly to Firebase Storage (client SDK,
+not through a Cloud Function — unlike Gemini, Storage isn't a secret-holding
+service) at assistantPhotos/{uid}/{assistantId}, a single fixed object per
+assistant with no filename/extension, so re-uploading just overwrites it instead
+of accumulating orphans. storage.rules scopes read/write to the owning uid and
+caps size (5MB) and content-type (image/*) — keep MAX_PHOTO_BYTES in
+AssistantModal.jsx in sync with the rule's size check. Deleting the assistant doc
+triggers cleanupAssistantPhoto (functions/index.js) to remove the Storage object.
 
 Every role in AssistantModal's ROLES needs a matching entry in generateScript.js's
 ROLE_HINT; every emotion in EMOTIONS needs matching entries in generateScript.js's
@@ -139,16 +150,20 @@ Validate all fields are non-empty.
 Write assistant to Firestore at users/{uid}/assistants.
 Close modal only after successful write.
 
-Creation pattern:
+Creation pattern (uses setDoc with a pre-generated doc ref, not addDoc, so a new
+assistant's id is known up front — needed to upload its photo to a path keyed by
+that id before/alongside the Firestore write):
 
 const handleSave = async () => {
   const trimmedName = name.trim();
+  const assistantId = doc(collection(db, "users", user.uid, "assistants")).id;
 
-  await addDoc(collection(db, "users", user.uid, "assistants"), {
+  await setDoc(doc(db, "users", user.uid, "assistants", assistantId), {
     name: trimmedName,
     role,
     emotion,
     voiceId,
+    photoUrl,
     createdAt: serverTimestamp(),
   });
 };
@@ -271,6 +286,14 @@ rule and is correctly denied to all clients by default — don't add one.
 
 If Firestore returns "Missing or insufficient permissions," check rules before
 changing frontend logic.
+
+Storage Security Rules
+
+../storage.rules is the real, deployed rule. assistantPhotos/{userId}/{assistantId}
+allows read/write only when request.auth.uid == userId, plus a 5MB size cap and an
+image/* content-type check on write. Everything else (tts/ audio) denies all client
+access by default — that's intentional, it's written server-side only by the Cloud
+Functions' Admin SDK, which bypasses these rules entirely.
 
 Development Philosophy
 
