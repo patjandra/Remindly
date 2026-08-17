@@ -1,7 +1,14 @@
 {
   "name": "remindly",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Remindly — a voice-assisted calendar app where each event's reminder can be spoken by a custom AI assistant persona (Gemini script generation + TTS).",
+  "homepage": "https://remindly-web.web.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patjandra/Remindly.git"
+  },
+  "author": "Preston Tjandra",
   "type": "module",
   "scripts": {
     "dev": "vite",
