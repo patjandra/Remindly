@@ -23,7 +23,13 @@ export default function LoginPage({ onLogin }) {
                     the real, crawlable homepage that explains the app's purpose for
                     Google's OAuth review — this screen just needs to get someone signed
                     in, so it stays minimal: logo + button. */}
-                <img src="/remindly-logo.png" alt="Remindly" className="w-auto h-80 mx-auto transform hover:-translate-y-1 transition-all duration-300 ease-linear" />
+                {/* Constrain by width, not height: the source image is a wide 3:2
+                    lockup (1536x1024), and this card's content area (max-w-md minus
+                    padding) isn't wide enough to fit it at a large forced height —
+                    max-width:100% would then clamp the width while the height stayed
+                    fixed, squishing it. Width-constrained + h-auto always preserves
+                    the real aspect ratio instead. */}
+                <img src="/remindly-logo.png" alt="Remindly" className="w-72 h-auto mx-auto transform hover:-translate-y-1 transition-all duration-300 ease-linear" />
 
                 <button
                     onClick={handleLogin}
