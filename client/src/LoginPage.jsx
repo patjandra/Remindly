@@ -16,21 +16,18 @@ export default function LoginPage({ onLogin }) {
     }
 
     return (
-        <div className="h-screen flex items-center justify-center bg-gray-50">
-            <div className="w-[420px] bg-white rounded-2xl border border-gray-200 shadow-xl px-8 py-10 text-center">
-                <img src="/remindly-logo.png" alt="Remindly" className="w-auto h-24 mx-auto" />
-
-                <h1 className="mt-6 text-xl font-semibold text-gray-900">Welcome to Remindly</h1>
-                <p className="mt-1.5 text-sm text-gray-500">
-                    A voice-assisted calendar assistant.
-                </p>
+        <div className="h-screen flex items-center justify-center bg-blue-100">
+            <div className="bg-gray-50 opacity-95 w-[500px] h-[600px] rounded-2xl shadow-[0_0_70px_10px_rgba(56,189,248,0.4)] text-center items-baseline">
+                <img src="/remindly-logo.png" alt="Remindly Logo" className="w-auto h-80 mx-auto mt-5 transform hover:-translate-y-1 transition-all duration-300 ease-linear" />
 
                 <button
                     onClick={handleLogin}
-                    className="mt-8 w-full flex items-center justify-center gap-2.5 border border-gray-300 rounded-xl py-3 px-4 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 shadow-sm hover:shadow transition-all cursor-pointer"
+                    className="bg-gray-50 opacity-95 text-gray-700 hover:bg-sky-50 hover:border-2 hover:border-sky-300 border-2 border-blue-100 hover:shadow-2xl shadow-md transform hover:-translate-y-1 transition-all duration-300 ease-linear text-xl rounded-xl font-semibold py-4 px-4 w-3/4 mx-auto mt-6"
                 >
-                    <img src="/google-logo.png" alt="" className="w-5 h-5" />
-                    Sign in with Google
+                    <div className="flex flex-row items-center justify-center">
+                        <img src="/google-logo.png" alt="Google Logo" className="w-auto h-9 mr-1" />
+                        <span>Sign in with Google</span>
+                    </div>
                 </button>
             </div>
         </div>
