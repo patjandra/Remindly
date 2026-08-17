@@ -4,10 +4,32 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/remindly-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-site-verification" content="HvaVNp8SdWt1za5We29HlhU8CoXv997Crbv14tDxko0" />
+    <!-- Second verification tag — same domain, verified independently by a second
+         Google account (patjandra@gmail.com) that also needed Search Console access
+         to this property for the OAuth consent screen's ownership check to pass. -->
+    <meta name="google-site-verification" content="JfSdSMntvHqJjY-RdbEmAwTq30jY6Q_yOtTawQW_d6g" />
+    <meta name="description" content="Remindly is a voice-assisted calendar app. Create events, assign each one a custom AI assistant with its own personality and voice, and get spoken reminders when they're due. Optionally import your existing Google Calendar to bring your events in automatically." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <title>Remindly</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Static fallback content in the raw HTML, not only the JS-rendered app —
+         Remindly is a client-side React SPA, so a crawler that doesn't execute JS
+         (e.g. Google's OAuth consent screen homepage checker) sees only whatever is
+         here until React mounts and replaces it. Keep this in sync with
+         LoginPage.jsx's heading/description if either changes. -->
+    <div id="root">
+      <h1>Remindly</h1>
+      <p>
+        Remindly is a voice-assisted calendar app. Create events, assign each one a
+        custom AI assistant with its own personality and voice, and get spoken
+        reminders when they're due. Optionally import your existing Google Calendar
+        to bring your events in automatically.
+      </p>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

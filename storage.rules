@@ -1,10 +1,20 @@
 rules_version = '2';
 
-// Craft rules based on data in your Firestore database
-// allow write: if firestore.get(
-//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
+    // Assistant profile pictures — one object per assistant (no filename/extension
+    // in the path, so re-uploading a photo just overwrites the same object instead
+    // of accumulating orphans). Only the owning user can read or write their own.
+    match /assistantPhotos/{userId}/{assistantId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Everything else (TTS audio) is server-side only, written by the Cloud
+    // Functions' Admin SDK, which bypasses these rules entirely — so clients get
+    // no direct access.
     match /{allPaths=**} {
       allow read, write: if false;
     }

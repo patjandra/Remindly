@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "remindly-b4445"
-  }
+  },
+  "targets": {
+    "remindly-b4445": {
+      "hosting": {
+        "remindly-web": [
+          "remindly-web"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
