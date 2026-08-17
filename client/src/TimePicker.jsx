@@ -24,19 +24,32 @@ export function to12h(val) {
 
 function parseTimeText(raw) {
     if (!raw) return null;
-    const t = raw.trim().toLowerCase().replace(/\s+/g, ' ');
-    let h, m = 0, ampm = null, match;
+    let t = raw.trim().toLowerCase().replace(/\s+/g, '');
+    if (!t) return null;
 
-    match = t.match(/^(\d{1,2}):(\d{2})(?:\s*(am|pm))?$/);
-    if (match) { h = +match[1]; m = +match[2]; ampm = match[3] || null; }
-
-    if (h === undefined) {
-        match = t.match(/^(\d{1,2})\s*(am|pm)$/);
-        if (match) { h = +match[1]; ampm = match[2]; }
+    // Pull off a trailing am/pm marker first, accepting the full word or just its
+    // first letter (so "438p" and "438pm" both work, not just "4:38 pm").
+    let ampm = null;
+    const ampmMatch = t.match(/(am|pm|a|p)$/);
+    if (ampmMatch) {
+        ampm = ampmMatch[1][0];
+        t = t.slice(0, -ampmMatch[1].length);
     }
+
+    let h, m = 0, match;
+
+    match = t.match(/^(\d{1,2}):(\d{1,2})$/);
+    if (match) { h = +match[1]; m = +match[2]; }
+
     if (h === undefined) {
+        // Shorthand digits with no colon — "438" → 4:38, "1630" → 16:30. With an
+        // am/pm marker attached this is what makes "438p" resolve to 4:38 PM.
         match = t.match(/^(\d{3,4})$/);
-        if (match) { const n = +match[1]; h = Math.floor(n / 100); m = n % 100; }
+        if (match) {
+            const digits = match[1];
+            m = +digits.slice(-2);
+            h = +digits.slice(0, -2);
+        }
     }
     if (h === undefined) {
         match = t.match(/^(\d{1,2})$/);
@@ -44,8 +57,8 @@ function parseTimeText(raw) {
     }
 
     if (h === undefined || isNaN(h)) return null;
-    if (ampm === 'pm' && h !== 12) h += 12;
-    if (ampm === 'am' && h === 12) h = 0;
+    if (ampm === 'p' && h !== 12) h += 12;
+    if (ampm === 'a' && h === 12) h = 0;
     if (h < 0 || h > 23 || m < 0 || m > 59) return null;
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
