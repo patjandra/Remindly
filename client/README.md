@@ -1,16 +1,36 @@
-# React + Vite
+# Remindly — client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for Remindly. See the [repo root README](../README.md) for
+what the app does and how the whole system fits together; this file just covers
+running and building this package.
 
-Currently, two official plugins are available:
+## Commands
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm run dev       # Start the Vite dev server at localhost:5173
+npm run build      # Production build (outputs to dist/)
+npm run lint       # ESLint
+npm run preview    # Preview the production build locally
+```
 
-## React Compiler
+## Environment variables
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create `client/.env` (gitignored) with:
 
-## Expanding the ESLint configuration
+```
+VITE_SCRIPT_ENDPOINT=<generateScript Cloud Function URL>
+VITE_SCRIPT_MODEL=gemini-flash-lite-latest
+VITE_TTS_ENDPOINT=<tts Cloud Function URL>
+VITE_TTS_MODEL=<gemini TTS model name>
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+None of these are secrets — the actual Gemini API key lives server-side only, in
+`functions/index.js` via Firebase Secrets Manager. Firebase project config (API
+key, project ID, etc.) is in `firebase.js` and is the standard public Firebase Web
+config, not a bearer secret — real access control is enforced by
+`firestore.rules` / `storage.rules`.
+
+## Structure
+
+See [`CLAUDE.md`](CLAUDE.md) for the full file-by-file breakdown, Firestore/Storage
+schema, and the conventions this codebase follows.
