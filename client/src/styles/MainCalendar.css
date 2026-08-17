@@ -1,4 +1,9 @@
-.rbc-container { font-family: inherit; }
+/* font-variant-numeric: tabular-nums keeps every digit the same width across the
+   whole calendar (date cells, time gutter, week headers, agenda) — without it,
+   dates jitter slightly as they change (e.g. "1" vs "22") since proportional
+   figures aren't fixed-width. Small detail, but it's a real tell of a
+   deliberately-typeset data grid vs. a default one. */
+.rbc-container { font-family: inherit; font-variant-numeric: tabular-nums; }
 
 /* ── Outer view borders ── */
 .rbc-time-view,
@@ -233,12 +238,20 @@
 .dark .rbc-month-view,
 .dark .rbc-time-view         { border-color: #374151; background: #1f2937; }
 .dark .rbc-header             { background: #111827; color: #6b7280; border-bottom-color: #374151; }
+.dark .rbc-header + .rbc-header { border-left-color: #374151; }
 .dark .rbc-header.rbc-today   { background: var(--color-blue-900); color: var(--color-blue-400); }
 .dark .rbc-date-cell .rbc-button-link { color: #9ca3af; }
 .dark .rbc-date-cell .rbc-button-link:hover { background: #374151; }
 .dark .rbc-date-cell.rbc-now .rbc-button-link { background: var(--color-blue-500) !important; color: #fff !important; }
 .dark .rbc-time-content       { border-top-color: #374151; background: #1f2937; }
 .dark .rbc-time-header-content{ border-left-color: #374151; }
+/* Week/day view's vertical column separators — react-big-calendar draws these via
+   its own low-specificity `.rbc-time-content > * + * > *` rule (hardcoded #ddd),
+   which our other dark overrides don't touch since they target rbc-day-bg/rbc-header
+   instead. Without this, the lines stay light grey and read as white on the dark
+   background. */
+.dark .rbc-time-content > * + * > * { border-left-color: #374151; }
+.dark .rbc-time-view .rbc-allday-cell + .rbc-allday-cell { border-left-color: #374151; }
 .dark .rbc-timeslot-group     { border-bottom-color: #111827; }
 .dark .rbc-day-slot .rbc-timeslot-group { background: #1f2937; }
 .dark .rbc-time-slot          { color: #4b5563; }
@@ -262,6 +275,7 @@
 /* Dark agenda */
 .dark .rbc-agenda-table thead th  { background: #111827; color: #6b7280; border-bottom-color: #374151; }
 .dark .rbc-agenda-table tbody > tr > td { border-bottom-color: #1f2937; }
+.dark .rbc-agenda-table tbody > tr > td + td { border-left-color: #374151; }
 .dark .rbc-agenda-table tbody > tr:hover > td { background: #111827; }
 .dark .rbc-agenda-date-cell   { color: #9ca3af; }
 .dark .rbc-agenda-time-cell   { color: #6b7280; }

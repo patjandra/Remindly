@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-    format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
+    format, startOfMonth, startOfWeek, addDays,
     eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths,
 } from 'date-fns';
 
@@ -13,10 +13,11 @@ export default function MiniCalendar({ selectedDate, onDateSelect }) {
         if (selectedDate) setViewMonth(selectedDate);
     }, [selectedDate]);
 
-    const days = eachDayOfInterval({
-        start: startOfWeek(startOfMonth(viewMonth), { weekStartsOn: 1 }),
-        end:   endOfWeek(endOfMonth(viewMonth),     { weekStartsOn: 1 }),
-    });
+    // Always render exactly 6 weeks (42 cells), even though a month only needs 4-6 —
+    // otherwise the grid's own height changes month to month and pushes "Create
+    // Assistant" and everything below it up/down as you page through months.
+    const gridStart = startOfWeek(startOfMonth(viewMonth), { weekStartsOn: 1 });
+    const days = eachDayOfInterval({ start: gridStart, end: addDays(gridStart, 41) });
 
     return (
         <div className="px-2 py-1 select-none">
@@ -55,7 +56,7 @@ export default function MiniCalendar({ selectedDate, onDateSelect }) {
                     const inMonth   = isSameMonth(day, viewMonth);
                     const todayFlag = isToday(day);
 
-                    let cellClass = 'w-7 h-7 mx-auto flex items-center justify-center rounded-full text-[11px] cursor-pointer transition-colors duration-100 ';
+                    let cellClass = 'w-7 h-7 mx-auto flex items-center justify-center rounded-full text-[11px] tabular-nums cursor-pointer transition-colors duration-100 ';
 
                     if (selected) {
                         cellClass += 'bg-blue-500 text-white font-semibold';
