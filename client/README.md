@@ -11,6 +11,7 @@ npm run dev       # Start the Vite dev server at localhost:5173
 npm run build      # Production build (outputs to dist/)
 npm run lint       # ESLint
 npm run preview    # Preview the production build locally
+npm test            # Run the Vitest unit test suite
 ```
 
 ## Environment variables

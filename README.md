@@ -1,5 +1,7 @@
 # Remindly
 
+[![CI](https://github.com/patjandra/Remindly/actions/workflows/ci.yml/badge.svg)](https://github.com/patjandra/Remindly/actions/workflows/ci.yml)
+
 A calendar app where every event can have its own AI assistant — a persona with a
 name, role, emotion, and voice — that speaks a custom reminder out loud shortly
 before the event happens.
@@ -67,6 +69,7 @@ themselves live in `functions/` and deploy with `firebase deploy --only function
 
 ## Status
 
-Actively developed, single-author project. No automated test suite is wired up
-yet (see `client/CLAUDE.md`); reminder delivery currently requires the app tab to
-be open (client-side polling, not push-based).
+Actively developed, single-author project. Unit tests (Vitest) cover the pure
+logic in both the client and Cloud Functions, run in CI on every push — see the
+badge above. Reminder delivery currently requires the app tab to be open
+(client-side polling, not push-based).
