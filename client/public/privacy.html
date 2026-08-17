@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/remindly-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<title>Privacy Policy — Remindly</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f9fafb;
+    color: #1f2937;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 56px 24px 96px; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .brand img { width: 36px; height: 36px; border-radius: 10px; }
+  .brand span { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; color: #111827; }
+  h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .updated { color: #6b7280; font-size: 0.85rem; margin-bottom: 40px; }
+  h2 { font-size: 1.1rem; font-weight: 700; margin: 36px 0 10px; letter-spacing: -0.01em; }
+  p, li { color: #374151; font-size: 0.95rem; }
+  ul { padding-left: 1.25em; margin: 10px 0; }
+  li { margin-bottom: 6px; }
+  a { color: #4f46e5; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .back { display: inline-block; margin-top: 40px; font-size: 0.85rem; color: #6b7280; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <img src="/remindly-icon.png" alt="" />
+      <span>Remindly</span>
+    </div>
+    <div class="card">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: August 16, 2026</p>
+
+      <p>Remindly is a personal-project voice-reminder calendar app. This page explains what
+      data it collects, why, and how it's used — plainly, without legal boilerplate padding
+      it out.</p>
+
+      <h2>Signing in</h2>
+      <p>Remindly uses Google Sign-In (via Firebase Authentication) as its only way to create
+      an account. When you sign in, Google shares your name, email address, and profile
+      photo with Firebase Authentication so your session can be identified — but Remindly's
+      own database never stores your name or email. Internally, the app only keeps your
+      account's unique ID, which is what every event and assistant you create is tied to.</p>
+
+      <h2>Google Calendar (optional)</h2>
+      <p>On first login, Remindly asks whether you'd like to import your existing Google
+      Calendar events. If you say yes, it requests read-only access to your calendar events
+      (the <code>calendar.events.readonly</code> scope) — just enough to fetch your events
+      once and copy them in. Remindly never creates, edits, or deletes anything on your
+      actual Google Calendar, and never requests broader access than this. You can decline
+      this step entirely and use the app without it.</p>
+
+      <h2>What Remindly stores</h2>
+      <p>Everything you create in the app — events (title, time, location, description,
+      color, reminder timing), and "assistants" (a name, a role/emotion persona, a chosen
+      voice, and an optional uploaded photo) — is stored in Firebase (Google Cloud
+      infrastructure) under your account's unique ID, and is only ever readable by your own
+      account.</p>
+
+      <h2>AI-generated reminders</h2>
+      <p>When a reminder is due, Remindly sends the event's details and the assistant's
+      persona to Google's Gemini API (server-side, never directly from your browser) to
+      generate a short spoken script and synthesize it into audio. That audio is stored
+      alongside your event and deleted automatically if you delete the event.</p>
+
+      <h2>What Remindly does not do</h2>
+      <ul>
+        <li>Does not sell or share your data with third parties for advertising or marketing.</li>
+        <li>Does not show ads or use analytics/tracking scripts.</li>
+        <li>Does not write to, modify, or delete anything in your actual Google Calendar.</li>
+      </ul>
+
+      <h2>Deleting your data</h2>
+      <p>Deleting an event or an assistant inside the app permanently removes it, including
+      any generated audio or uploaded photo tied to it. To delete your entire account and
+      all associated data, email <a href="mailto:patjandra@berkeley.edu">patjandra@berkeley.edu</a>
+      and it will be removed.</p>
+
+      <h2>Children</h2>
+      <p>Remindly is not directed at, and is not knowingly used by, children under 13.</p>
+
+      <h2>Changes</h2>
+      <p>If this policy changes, the "last updated" date above will change with it.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about this policy or your data: <a href="mailto:patjandra@berkeley.edu">patjandra@berkeley.edu</a>.</p>
+    </div>
+    <a class="back" href="/">← Back to Remindly</a>
+  </div>
+</body>
+</html>
